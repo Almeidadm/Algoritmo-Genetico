@@ -7,5 +7,6 @@ To use this code it is necessary to have installed Python3 and the following lib
 
 
 More information about the program's input can be viewed at
+
 `$ python3 tsp.py -h`
 
