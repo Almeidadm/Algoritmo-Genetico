@@ -4,14 +4,14 @@ from numpy import partition
 import sys, getopt, traceback, os, re, shutil, imageio
 import matplotlib.pyplot as plt
 
-if(not os.path.exists("./Resultados/")):
-    os.mkdir("./Resultados/")
-if(not os.path.exists("./Resultados/Imagens")):
-    os.mkdir("./Resultados/Imagens/")
-if(not os.path.exists("./Resultados/GIF")):
-    os.mkdir("./Resultados/GIF/")    
-if(not os.path.exists("./Resultados/Tours")):
-    os.mkdir("./Resultados/Tours/")      
+if(not os.path.exists("./Results/")):
+    os.mkdir("./Results/")
+if(not os.path.exists("./Results/Images")):
+    os.mkdir("./Results/Images/")
+if(not os.path.exists("./Results/GIF")):
+    os.mkdir("./Results/GIF/")    
+if(not os.path.exists("./Results/Tours")):
+    os.mkdir("./Results/Tours/")      
 
 class Files:
 
@@ -217,9 +217,9 @@ def natural_keys(text):
 
 def print_path(path, nodes, name):
     
-    if name in os.listdir('./Resultados/Imagens/'):
-            shutil.rmtree('./Resultados/Imagens/'+name)
-    os.mkdir('./Resultados/Imagens/'+name) 
+    if name in os.listdir('./Results/Images/'):
+            shutil.rmtree('./Results/Images/'+name)
+    os.mkdir('./Results/Images/'+name) 
     
     fig, ax = plt.subplots(figsize=(12, 8))
     
@@ -237,7 +237,7 @@ def print_path(path, nodes, name):
 
         ax.plot(x_points, y_points, color='red')
         
-        plt.savefig('./Resultados/Imagens/'+name+'/'+str(i))
+        plt.savefig('./Results/Images/'+name+'/'+str(i))
     
     v = path[0]+1
     u = path[-1]+1
@@ -250,19 +250,19 @@ def print_path(path, nodes, name):
 
     ax.plot(x_points, y_points, color='red')
 
-    plt.savefig('./Resultados/Imagens/'+name+'/'+str(i))
+    plt.savefig('./Results/Images/'+name+'/'+str(i))
     
     images = []
-    sorted_names = list(os.listdir('./Resultados/Imagens/'+name+'/'))
+    sorted_names = list(os.listdir('./Results/Images/'+name+'/'))
     sorted_names.sort(key=natural_keys)
     for filename in sorted_names:
-        images.append(imageio.imread('./Resultados/Imagens/'+name+'/'+filename))
-    imageio.mimsave('./Resultados/GIF/'+name+'_tour.gif', images, duration=0.2)
+        images.append(imageio.imread('./Results/Images/'+name+'/'+filename))
+    imageio.mimsave('./Results/GIF/'+name+'_tour.gif', images, duration=0.2)
     
     plt.clf, plt.cla
             
 def write_tour(filename, path, count):
-    file = open('./Resultados/Tours/'+filename+'.tour', 'w')
+    file = open('./Results/Tours/'+filename+'.tour', 'w')
     
     file.write('NAME: '+filename+'\n')
     file.write('COMMENT: Tour length {}\n'.format(count))
