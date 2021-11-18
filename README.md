@@ -1,12 +1,11 @@
-# Algoritmo Genético para resolver o Problema do Caixeiro Viajante
-
-Este repositório foi criado de forma que a implementação do algoritmo genético aqui apresentada possa permanecer pública. 
-
-Para utilização deste código é necessário ter instalado Python3 e as seguintes bibliotecas: numpy, matplotlib, shutil e imageio.
+# Genetic Algorithm to Solve the Traveling Salesman Problem
 
 
+This repository was created so that the implementation of the genetic algorithm presented here can remain public. 
 
-Mais informações sobre o input do programa pode ser visualizado em
+To use this code it is necessary to have installed Python3 and the following libraries: numpy, matplotlib, shutil and imageio.
 
+
+More information about the program's input can be viewed at
 `$ python3 tsp.py -h`
 
