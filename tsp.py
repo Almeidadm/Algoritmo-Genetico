@@ -41,8 +41,8 @@ def get_arg(argv, metrics, files):
 		sys.exit(2)
 	for opt, arg in opts:
 		if opt == "-h":
-			print("\t --tsp_file <input doc.tsp>\n\t --population_size <integer [1,infty)>\n\t --generetions_number <integer [1,infty)>\n\t --mutation_rate <float [0,1]>\n")
-   
+			print("\t --tsp_file <input doc.tsp>\n\t --population_size <integer [1,infty)>\n\t --generetion_number <integer [1,infty)>\n\t --mutation_rate <float [0,1]>")
+			sys.exit(2)
 		elif opt in ('-t','--tsp_file'):
 			if arg[-4:] != ".tsp":
 				print("Unexpected error: file does not fit to .tsp format\t")
