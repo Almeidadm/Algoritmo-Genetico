@@ -1,8 +1,9 @@
-from math import sqrt
+from math import sqrt, floor
 from random import randint, shuffle, random
 from numpy import partition
 import sys, getopt, traceback, os, re, shutil, imageio
 import matplotlib.pyplot as plt
+import numpy as np
 
 if(not os.path.exists("./Resultados/")):
     os.mkdir("./Resultados/")
@@ -32,15 +33,17 @@ class Metrics:
 		self.population_size = 1
 		self.generation_number = 1
 		self.mutation_rate = 0.5
-
+		self.elitism = 0.3
+        
+        
 def get_arg(argv, metrics, files):
 	try:
-		opts, args = getopt.getopt(argv, 'h:t:k:n:m', ['tsp_file=', 'population_size=', 'generation_number=', 'mutation_rate=']) 
+		opts, args = getopt.getopt(argv, 'h:t:k:n:m:e', ['--help=','tsp_file=', 'population_size=', 'generation_number=', 'mutation_rate=', 'elitism=']) 
 	except getopt.GetoptError:
 		print("Unexpected error:", sys.exc_info()[0])
 		sys.exit(2)
 	for opt, arg in opts:
-		if opt == "-h":
+		if opt in ("-h", "--help"):
 			print("\t --tsp_file <input doc.tsp>\n\t --population_size <integer [1,infty)>\n\t --generetion_number <integer [1,infty)>\n\t --mutation_rate <float [0,1]>")
 			sys.exit(2)
 		elif opt in ('-t','--tsp_file'):
@@ -68,6 +71,12 @@ def get_arg(argv, metrics, files):
 				sys.exit(5)
 			metrics.mutation_rate = float(arg)
   
+		elif opt in ("e","--elitism"):
+			if float(arg) > 1 or float(arg) < 0:
+				print("Unexpected error: elitism out of range")
+				sys.exit(6)
+			metrics.elitism = float(arg)
+			
 # distancia entre os pontos
 def euclidian_distance(p1, p2):
     return abs(sqrt( (p1[0] - p2[0])**2 + (p1[1] - p2[1])**2 ))
@@ -98,16 +107,19 @@ def PMX(seq1, seq2):
     for i in range(point):
         
         # primeiro filho
-        idx = new_1.index(seq2[i])
+        idx = np.where(np.array(new_1) == seq2[i])[0][0]
+        
         new_1[i], new_1[idx] = new_1[idx], new_1[i]
         
         # segundo filho
-        idx = new_2.index(seq1[i])
+        idx = np.where(np.array(new_2) == seq1[i])[0][0]
         new_2[i], new_2[idx] = new_2[idx], new_2[i]
     
     return new_1, new_2
 
-def new_population(s, k):
+def new_population(n, k):
+    
+    s = [i for i in range(n)]
     
     population = [s]
     
@@ -119,30 +131,6 @@ def new_population(s, k):
         else:
             _ -= 1
     return population
-
-# Roulette Wheel Selection
-# https://www.researchgate.net/publication/259461147_Selection_Methods_for_Genetic_Algorithms
-def rw_selection(prob):
-    a = random()*1000
-    for i in range(len(prob)):
-        if a < prob[i]:
-            return i-1
-        
-# individuo com menor fitness tem maior chance de serem escolhidos        
-def set_probabilities(fitness_values):
-    n = len(fitness_values)
-    p = []
-    for i in range(n):
-        aux = 1/(n-1)
-        aux *= 1 - (fitness_values[i] / sum(fitness_values))
-        p.append(aux)
-        
-    prob = [p[0]*1000]
-    
-    for i in range(1, len(fitness_values)):
-        prob.append((prob[-1] + p[i]*1000))
-    
-    return prob
 
 # Reverse Sequence Mutation
 # https://arxiv.org/pdf/1203.3099.pdf
@@ -160,55 +148,53 @@ def RSM(s, mutation_rate):
         j -= 1
     return
     
+def crossover(population):
+	#print(len(population))
+	n = len(population)
+	par = True if n % 2 == 0 else False
+	
+	if par:
+		for i in range(0, n-1, 2):
+			population[i], population[i+1] = PMX(population[i], population[i+1])
+
+	else:
+		for i in range(n-2):
+			population[i], population[i+1] = PMX(population[i], population[i+1])
+		population[0], population[-1] = PMX(population[0], population[-1])
+	return population
+		 
+def mutation(population, m_rate):
+	#print(len(population))
+	for s in population:
+		RSM(s, m_rate)
+	return population
+    		
 # algoritmo genético
-def GA(nodes, k, m, mutation_rate):
+def GA(nodes, k, m, mutation_rate, elitism):
+
+	# elitismo é a porcentagem de quais os melhores individuos que são conservados
+    population = np.array(new_population(len(nodes), k))
     
-   ''' init = [i for i in range(len(nodes))]
-    population = new_population(init, k)
     
-    fit_values = [ fitness(s, nodes) for s in population ]
-    prob = set_probabilities(fit_values)
-    min_dist = min(fit_values)
     
-    # m numero de gerações
     for _ in range(m):
         
-        # seleciona dois pais
-        i = rw_selection(prob)
-        j = rw_selection(prob)
+        fit_values = np.array([ fitness(s, nodes) for s in population ])
+        top = np.argpartition(fit_values, elitism)[:elitism]
+        offspring = [i for i in range(k) if i not in top]
+    	
+        new_offs = crossover(population[offspring])
+    	
+        new_offs = mutation(population[offspring], mutation_rate)
         
-        if i == j: # garante que sejam diferentes
-            _ -= 1
-            continue
-    
-        # toma os novos filhos
-        offspring1, offspring2 = PMX(population[i], population[j])
+        population = population[top]
+    	
+        population = np.concatenate((population, np.array(new_offs)), axis=0)
         
-        # mutação nos filhos
-        RSM(offspring1, mutation_rate)
-        RSM(offspring2, mutation_rate)
-        
-        population.append(offspring1)
-        fit_values.append(fitness(offspring1, nodes))
-        
-        population.append(offspring2)
-        fit_values.append(fitness(offspring2, nodes))
-        
-        
-        # remove os dois items menos ajustados
-        for _ in range(2):
-            aux = max(fit_values)
-            idx = fit_values.index(aux)
-            del fit_values[idx]
-            del population[idx]
-        
-        prob = set_probabilities(fit_values)
-        
-    fit_min = min(fit_values)
-    idx = fit_values.index(fit_min)
-    '''
-    
-    return population[idx], fit_min
+    fit = min(fit_values)
+    idx = np.where(fit_values == fit)[0][0]
+
+    return population[idx], fit
     
 def atoi(text):
     return int(text) if text.isdigit() else text
@@ -291,7 +277,9 @@ if __name__ == "__main__":
     
     nodes = f.get_nodes()
     
-    path, cost = GA(nodes, m.population_size, m.generation_number, m.mutation_rate)
+    elitism = floor(m.population_size * m.elitism)
+    
+    path, cost = GA(nodes, m.population_size, m.generation_number, m.mutation_rate, elitism)
         
     write_tour(f.name, path, cost)
     
