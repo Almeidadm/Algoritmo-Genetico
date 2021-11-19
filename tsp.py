@@ -163,7 +163,7 @@ def RSM(s, mutation_rate):
 # algoritmo genético
 def GA(nodes, k, m, mutation_rate):
     
-    init = [i for i in range(131)]
+   ''' init = [i for i in range(len(nodes))]
     population = new_population(init, k)
     
     fit_values = [ fitness(s, nodes) for s in population ]
@@ -206,6 +206,7 @@ def GA(nodes, k, m, mutation_rate):
         
     fit_min = min(fit_values)
     idx = fit_values.index(fit_min)
+    '''
     
     return population[idx], fit_min
     
