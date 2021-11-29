@@ -33,4 +33,5 @@ Veja a seguir a comparação quando atribuímos os valores de mutação *r = {0.
 
 Agora, quando definimos *m=20000*, *r=0.6* e *n = {50, 100, 200, 500}* podemos vizualizar o seguinte comportamento:
 ![image](https://user-images.githubusercontent.com/47041221/143791941-8943b9d8-dc74-47e4-818f-25f019819a0a.png)
+
 Onde notoriamente a população de cinquenta indivíduos convergiu bem melhor que a de 500.
