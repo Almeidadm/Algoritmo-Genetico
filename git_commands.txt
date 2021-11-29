@@ -1,0 +1,7 @@
+# push to main
+$ git add *
+$ git commit -m "commit"
+$ git push -u origin master
+
+# create branch | push to branch
+$ 
